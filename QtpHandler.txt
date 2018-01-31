@@ -1,0 +1,112 @@
+Dim a
+Dim pro4
+Dim pro5
+
+a = 1
+pro4 = Wscript.arguments(0)
+pro5 = Wscript.arguments(1)
+
+On Error Resume Next
+
+set b = CreateObject("WScript.Shell")
+Set objWMIService = GetObject("winmgmts:{impersonationLevel=impersonate}!\\" & "." & "\root\cimv2")
+
+Do While a = 1
+
+If b.Environment("USER")("runstatus") = 1 Then
+b.Environment("USER").Remove("runstatus")
+Set b = Nothing
+Set objWMIService = Nothing
+Wscript.Quit
+End iF
+
+Wscript.Sleep 1200000
+
+Set process = objWMIService.ExecQuery("Select * from Win32_Process Where Name ='wssmain.exe'")
+
+if process.count = 0 Then
+
+Set process = Nothing
+Set process = objWMIService.ExecQuery("Select * from Win32_Process Where Name =  'QTAutomationAgent.exe'")
+For Each objProcess in process
+objProcess.Terminate
+Next
+
+Set process = Nothing
+Set process = objWMIService.ExecQuery("Select * from Win32_Process Where Name ='QTPro.exe'")
+For Each objProcess in process
+objProcess.Terminate
+Next
+
+Set process = Nothing
+
+Else
+
+If b.Environment("USER")("runstatus") = 1 Then
+b.Environment("USER").Remove("runstatus")
+Set b = Nothing
+Set objWMIService = Nothing
+Wscript.Quit
+End iF
+
+'this is for process 1 which is main execution and control will come here after 20 min...
+Set process = objWMIService.ExecQuery("Select * from Win32_Process Where ProcessID = "&pro4)
+
+if process.count = 0 Then
+
+Set process = Nothing
+Set process = objWMIService.ExecQuery("Select * from Win32_Process Where Name =  'QTAutomationAgent.exe'")
+For Each objProcess in process
+objProcess.Terminate
+Next
+
+Set process = Nothing
+Set process = objWMIService.ExecQuery("Select * from Win32_Process Where Name ='QTPro.exe'")
+For Each objProcess in process
+objProcess.Terminate
+Next
+
+Set process = Nothing
+Set process = objWMIService.ExecQuery("Select * from Win32_Process Where Name like 'wss%'")
+For Each objProcess in process 
+objProcess.Terminate
+Next
+
+Set process = Nothing
+Set process = objWMIService.ExecQuery("Select * from Win32_Process Where Name like 'WSS%'")
+For Each objProcess in process
+objProcess.Terminate
+Next
+
+Set process = Nothing
+Set process = objWMIService.ExecQuery("Select * from Win32_Process Where Name like 'EXCEL%'")
+For Each objProcess in process
+objProcess.Terminate
+Next
+
+Set process = Nothing
+Set process = objWMIService.ExecQuery("Select * from Win32_Process Where ProcessId = "&pro5)
+For Each objProcess in process
+objProcess.Terminate
+Next
+
+Set process = Nothing
+b.run "C:\Automation\Execution.vbs"
+set b = Nothing
+Set objWMIService = Nothing
+Wscript.Quit
+
+Else
+
+Set process = objWMIService.ExecQuery("Select * from Win32_Process Where ProcessID = "&pro5)
+
+if process.count = 0 Then
+
+Set process = Nothing
+b.run "C:\Automation\DialogboxHandler.vbs "&pro4
+Wscript.Quit
+
+End if
+End if
+End iF
+Loop

