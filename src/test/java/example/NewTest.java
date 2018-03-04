@@ -26,7 +26,7 @@ public class NewTest {
   }
   @BeforeTest
   public void beforeTest() {
-	  System.setProperty("webdriver.gecko.driver", "C:\\Users\\DELL\\Downloads\\geckodriver.exe");
+	  System.setProperty("webdriver.gecko.driver", "F:\\SoftWares\\geckodriver.exe");
 	  final FirefoxOptions options = new FirefoxOptions();
 	  options.addPreference("security.sandbox.content.level", 5);
 	  driver = new FirefoxDriver(options);
